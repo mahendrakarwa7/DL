@@ -1,0 +1,54 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+import random
+
+x_train = np.loadtxt('C:/Users/HP/Desktop/DL_LAB/Public/PR 3 DL/Data/input.csv',delimiter=',')
+x_test = np.loadtxt('C:/Users/HP/Desktop/DL_LAB/Public/PR 3 DL/Data/input_test.csv',delimiter=',')
+y_train = np.loadtxt('C:/Users/HP/Desktop/DL_LAB/Public/PR 3 DL/Data/labels.csv',delimiter=',')
+y_test = np.loadtxt('C:/Users/HP/Desktop/DL_LAB/Public/PR 3 DL/Data/labels_test.csv',delimiter=',')
+
+x_train = x_train.reshape(len(x_train),100,100,3)
+y_train = y_train.reshape(len(y_train),1)
+x_test = x_test.reshape(len(x_test),100,100,3)
+y_test = y_test.reshape(len(y_test),1)
+
+x_train, x_test = x_train/255, x_test/255
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D,MaxPooling2D,Flatten,Dense
+
+model = Sequential([
+    Conv2D(32,(3,3),activation='relu',input_shape=(100,100,3)),
+    MaxPooling2D((2,2)),
+    
+    Conv2D(32,(3,3),activation='relu'),
+    MaxPooling2D((2,2)),
+    
+    Flatten(),
+    Dense(64,activation='relu'),
+    Dense(1,activation='sigmoid')
+])
+
+model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
+
+model.fit(x_train,y_train,epochs=10)
+
+model.evaluate(x_test,y_test)
+
+idx2 = random.randint(0,len(y_test))
+plt.imshow(x_test[idx2,:])
+plt.show()
+
+y_pred = model.predict(x_test[idx2,:].reshape(1,100,100,3))
+y_pred = y_pred > 0.5
+
+if(y_pred == 0):
+    pred = 'Dog'
+    
+else:
+    pred = 'Cat'
+    
+print("Our Model Says it is: ",pred)    
